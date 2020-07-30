@@ -60,12 +60,13 @@ func (a Artifact) Inspect(ctx context.Context) (types.ArtifactReference, error) 
 
 func (a Artifact) inspect(ctx context.Context, imageID string, missingImage bool, diffIDs []string) error {
 	done := make(chan struct{})
-	errCh := make(chan error)
+	errCh := make(chan error, len(diffIDs))
 
 	var osFound types.OS
 	for _, d := range diffIDs {
 		go func(diffID string) {
 			layerInfo, err := a.inspectLayer(diffID)
+
 			if err != nil {
 				errCh <- xerrors.Errorf("failed to analyze layer: %s : %w", diffID, err)
 				return
